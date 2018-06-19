@@ -24,22 +24,22 @@ Editar hosts do Nginx e incluir o host virtual do APP Web
 sudo vim /etc/nginx/sites-enabled/glpi
 
 server {
-         listen 80;
+         listen 80 default_server;
          root /usr/share/nginx/html/glpi;
-         index index.php;
-         servername nomedodominio;
-
-        location / {try files $uri $uri/ index.php;}
-
-        #prise on charge PHP
-        location ~ \.php$ {
-        fastcgi_pass 127.0.0.1:9000;
-        fastcgi_index index.php;
-        include /etc/nginx/fastcgi_params;
-        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
-        include fastcgi_params;
-        fastcgi_param SERVER_NAME $host;
-          }
+         index index.php index.html;
+         server_name nomedodominio;
+         location / {
+         try_files $uri $uri/ =404;
+         }
+         location ~ \.php$ {
+         fastcgi_intercept_errors on;
+         fastcgi_index index.php;
+         fastcgi_pass 127.0.0.1:9000;
+         include /etc/nginx/fastcgi_params;
+         fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+         include fastcgi_params;
+         fastcgi_param SERVER_NAME $host;
+         }
 }
 
 Reiniciando servicos web
@@ -51,7 +51,7 @@ Baixando GlPI
 
 wget https://github.com/glpi-project/glpi/releases/download/9.1.6/glpi-9.1.6.tgz
 
-Dando permissıes na pasta
+Dando permiss√µes na pasta
 
 sudo chown -R www-data:www-data /usr/share/nginx/html/glpi
 sudo chown -R 755 /usr/share/nginx/html/glpi
